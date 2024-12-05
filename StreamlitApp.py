@@ -14,7 +14,7 @@ import streamlit as st
 import openai
 
 # Set OpenAI API Key
-openai.api_key = "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"
+openai.api_key = "key"
 
 # Emission Factors
 EMISSION_FACTORS = {
