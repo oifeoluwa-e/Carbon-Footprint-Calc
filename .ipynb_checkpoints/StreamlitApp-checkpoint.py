@@ -1,23 +1,26 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 #!pip install streamlit pandas openai
 
 
-# In[1]:
+# In[2]:
 
 
 import streamlit as st
 import openai
 import os
-from openai import OpenAI
 
-# Set OpenAI API Key
-client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),)
+
+# Fetch the API key from the environment
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+if not openai.api_key:
+    raise ValueError("OpenAI API key not found! Please set it in the environment variables.")
+
 
 # Emission Factors
 EMISSION_FACTORS = {
@@ -47,34 +50,28 @@ def calculate_emissions(transportation, electricity, diet, waste):
     total_emissions = transport_emission + electricity_emission + diet_emission + waste_emission
     return total_emissions
 
-try:
-    
-    if st.button("Calculate Footprint"):
-        total_emissions = calculate_emissions(transportation, electricity, diet, waste)
-        st.success(f"🌱 Your total carbon footprint is approximately **{total_emissions:.2f} kg CO₂/month**")
-    
-        # Get Suggestions
-        def get_suggestions(emissions):
-            prompt = f"My carbon footprint is {emissions:.2f} kg CO₂ per month. How can I reduce it?"
-            response = client.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                    "role": "user",
-                    "content":prompt,
-                    }
-                    ],
-                max_tokens=150
-            )
-            return response.choices[0].text.strip()
-    
-        if st.button("Get Suggestions"):
-            suggestions = get_suggestions(total_emissions)
-            st.info(f"💡 Suggestions to reduce your footprint:\n\n{suggestions}")
-            print(suggestions)
+if st.button("Calculate Footprint"):
+    total_emissions = calculate_emissions(transportation, electricity, diet, waste)
+    st.success(f"🌱 Your total carbon footprint is approximately **{total_emissions:.2f} kg CO₂/month**")
 
-except Exception as e:
-    print("Error with OpenAI API:", e)
+    # Get Suggestions
+    def get_suggestions(emissions):
+        prompt = f"My carbon footprint is {emissions:.2f} kg CO₂ per month. How can I reduce it?"
+        response = openai.completions.create(
+            model="gpt-4o",
+            messages=[
+        {
+            "role": "user",
+            "content": prompt,
+        }
+    ],
+            max_tokens=150
+        )
+        return response.choices[0].text.strip()
+
+    if st.button("Get Suggestions"):
+        suggestions = get_suggestions(total_emissions)
+        st.info(f"💡 Suggestions to reduce your footprint:\n\n{suggestions}")
 
 
 # In[ ]:
