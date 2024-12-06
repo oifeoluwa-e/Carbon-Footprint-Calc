@@ -38,6 +38,8 @@ electricity = st.number_input("Monthly electricity usage (in kWh):", min_value=0
 diet = st.selectbox("Your primary diet:", ["Omnivore", "Vegetarian", "Vegan"])
 waste = st.number_input("Weekly waste produced (in kg):", min_value=0)
 
+
+
 # Calculate Emissions
 def calculate_emissions(transportation, electricity, diet, waste):
     transport_emission = transportation * EMISSION_FACTORS["transport"] * 30  # monthly
@@ -48,36 +50,36 @@ def calculate_emissions(transportation, electricity, diet, waste):
     return total_emissions
 
 try:
+    total_emissions = calculate_emissions(transportation, electricity, diet, waste)
     
     if st.button("Calculate Footprint"):
-        total_emissions = calculate_emissions(transportation, electricity, diet, waste)
+        
         st.success(f"🌱 Your total carbon footprint is approximately **{total_emissions:.2f} kg CO₂/month**")
     
         # Get Suggestions
-        def get_suggestions(emissions):
-            prompt = f"My carbon footprint is {emissions:.2f} kg CO₂ per month. How can I reduce it?"
-            response = client.completions.create(
-                model="gpt-4o",
-                messages=[
+    def get_suggestions(emissions):
+        prompt = f"My carbon footprint is {emissions:.2f} kg CO₂ per month. How can I reduce it?"
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
                     {
-                    "role": "user",
-                    "content":prompt,
+                        "role": "user",
+                        "content":prompt,
                     }
-                    ],
-                max_tokens=150
+                ],
+            #max_tokens=150
             )
-            return response.choices[0].text.strip()
-    
-        if st.button("Get Suggestions"):
-            suggestions = get_suggestions(total_emissions)
-            st.info(f"💡 Suggestions to reduce your footprint:\n\n{suggestions}")
-            print(suggestions)
+        return response.choices[0].message.content
+        
+    if st.button("Get Suggestions"):
+        suggestions = get_suggestions(total_emissions)
+        st.info(f"💡 Suggestions to reduce your footprint:\n\n{suggestions}")
+
 
 except Exception as e:
     print("Error with OpenAI API:", e)
 
-
-# In[ ]:
 
 
 
