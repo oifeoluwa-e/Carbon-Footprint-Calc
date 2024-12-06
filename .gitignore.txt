@@ -1,3 +1,0 @@
-StreamlitApp.ipynb
-StreamlitTestApp.py
-StreamlitTestApp.ipynb
